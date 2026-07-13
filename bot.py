@@ -136,7 +136,10 @@ def should_translate(text: str) -> bool:
         return False
 
     return True
-    
+
+def is_chinese(text: str) -> bool:
+    return bool(re.search(r'[\u4e00-\u9fff]', text))
+
 async def turn_on(
     update: Update,
     context: ContextTypes.DEFAULT_TYPE
@@ -295,20 +298,36 @@ async def translate_group(
     if not should_translate(text):
         return
 
-    response = client.chat.completions.create(
-        model="gpt-4.1-mini",
-        messages=[
-            {
-                "role": "system",
-                "content": SYSTEM
-            },
-            {
-                "role": "user",
-                "content": text
-            }
-        ],
-        temperature=0
-    )
+# Chọn prompt theo ngôn ngữ
+if is_chinese(text):
+    system_prompt = """
+Bạn là phiên dịch viên chuyên nghiệp.
+
+Hãy dịch chính xác từ tiếng Trung sang tiếng Việt.
+
+Quy tắc:
+- Chỉ trả về bản dịch tiếng Việt.
+- Không giải thích.
+- Không thêm ghi chú.
+- Không giữ nguyên tiếng Trung.
+"""
+else:
+    system_prompt = SYSTEM
+
+response = client.chat.completions.create(
+    model="gpt-4.1-mini",
+    messages=[
+        {
+            "role": "system",
+            "content": system_prompt
+        },
+        {
+            "role": "user",
+            "content": text
+        }
+    ],
+    temperature=0
+)
 
     answer = response.choices[0].message.content
 
