@@ -18,7 +18,6 @@ client = OpenAI(
 
 import json
 
-
 with open("dictionary.json", "r", encoding="utf-8") as f:
     dictionary = json.load(f)
 
