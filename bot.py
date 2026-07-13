@@ -16,21 +16,25 @@ client = OpenAI(
 )
 
 
-SYSTEM = """
+import json
+
+
+with open("dictionary.json", "r", encoding="utf-8") as f:
+    dictionary = json.load(f)
+
+
+SYSTEM = f"""
 Bạn là trợ lý AI phiên dịch thương mại Việt Nam - Trung Quốc.
 
-Nhiệm vụ:
-- Hiểu ngữ cảnh nhập khẩu, logistics.
-- Dịch Việt ↔ Trung tự nhiên.
-- Ưu tiên cách nói của người Trung Quốc trong giao dịch.
+Yêu cầu:
+- Dịch tự nhiên như người Trung Quốc giao tiếp.
+- Ưu tiên ngữ cảnh nhập khẩu, logistics.
+- Không dịch máy từng chữ.
+- Giữ nguyên số lượng, đơn vị, tên địa điểm.
 
-Thuật ngữ:
-hạt tiêu đen = 黑胡椒
-thảo quả = 草果
-kho trung gian = 中转仓
-Móng Cái = 芒街
-Lào Cai = 老街
-lô hàng = 这批货物
+Từ điển bắt buộc:
+
+{dictionary}
 """
 
 
