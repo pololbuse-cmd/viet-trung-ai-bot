@@ -22,6 +22,59 @@ client = OpenAI(
 with open("dictionary.json", "r", encoding="utf-8") as f:
     dictionary = json.load(f)
 
+STATUS_FILE = "group_status.json"
+
+
+def load_status():
+    try:
+        with open(STATUS_FILE, "r", encoding="utf-8") as f:
+            return json.load(f)
+    except:
+        return {}
+
+
+def save_status(data):
+    with open(STATUS_FILE, "w", encoding="utf-8") as f:
+        json.dump(
+            data,
+            f,
+            ensure_ascii=False,
+            indent=2
+        )
+
+
+group_status = load_status()
+
+async def turn_on(
+    update: Update,
+    context: ContextTypes.DEFAULT_TYPE
+):
+
+    chat_id = str(update.effective_chat.id)
+
+    group_status[chat_id] = True
+
+    save_status(group_status)
+
+    await update.message.reply_text(
+        "✅ Đã bật dịch tự động Việt ↔ Trung"
+    )
+
+async def turn_off(
+    update: Update,
+    context: ContextTypes.DEFAULT_TYPE
+):
+
+    chat_id = str(update.effective_chat.id)
+
+    group_status[chat_id] = False
+
+    save_status(group_status)
+
+    await update.message.reply_text(
+        "⛔ Đã tắt dịch tự động"
+    )
+
 
 SYSTEM = f"""
 Bạn là phiên dịch viên thương mại Việt Nam - Trung Quốc.
@@ -57,7 +110,14 @@ async def translate_group(
 
     if not update.message:
         return
+chat_id = str(update.effective_chat.id)
 
+if chat_id not in group_status:
+    group_status[chat_id] = True
+
+if not group_status[chat_id]:
+    return
+    
     text = update.message.text
 
     if not text:
@@ -101,6 +161,20 @@ app.add_handler(
     )
 )
 
+app.add_handler(
+    CommandHandler(
+        "on",
+        turn_on
+    )
+)
+
+
+app.add_handler(
+    CommandHandler(
+        "off",
+        turn_off
+    )
+)
 
 app.add_handler(
     MessageHandler(
