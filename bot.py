@@ -103,8 +103,6 @@ def should_translate(text: str) -> bool:
     ):
         return False
 
-    return True
-
     if not text:
         return False
 
