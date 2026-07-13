@@ -298,9 +298,9 @@ async def translate_group(
     if not should_translate(text):
         return
 
-# Chọn prompt theo ngôn ngữ
-if is_chinese(text):
-    system_prompt = """
+    # Chọn prompt theo ngôn ngữ
+    if is_chinese(text):
+        system_prompt = """
 Bạn là phiên dịch viên chuyên nghiệp.
 
 Hãy dịch chính xác từ tiếng Trung sang tiếng Việt.
@@ -311,23 +311,23 @@ Quy tắc:
 - Không thêm ghi chú.
 - Không giữ nguyên tiếng Trung.
 """
-else:
-    system_prompt = SYSTEM
+    else:
+        system_prompt = SYSTEM
 
-response = client.chat.completions.create(
-    model="gpt-4.1-mini",
-    messages=[
-        {
-            "role": "system",
-            "content": system_prompt
-        },
-        {
-            "role": "user",
-            "content": text
-        }
-    ],
-    temperature=0
-)
+    response = client.chat.completions.create(
+        model="gpt-4.1-mini",
+        messages=[
+            {
+                "role": "system",
+                "content": system_prompt
+            },
+            {
+                "role": "user",
+                "content": text
+            }
+        ],
+        temperature=0
+    )
 
     answer = response.choices[0].message.content
 
