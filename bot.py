@@ -1,5 +1,6 @@
 import os
 import json
+import re
 
 from openai import OpenAI
 
@@ -44,7 +45,102 @@ def save_status(data):
 
 
 group_status = load_status()
+IGNORE_WORDS = {
+    "ok",
+    "oke",
+    "okay",
+    "yes",
+    "no",
+    "hi",
+    "hello",
+    "thanks",
+    "thank you",
+    "haha",
+    "kkk",
+    "👍",
+    "👌",
+    "❤️",
+    "ok.",
+    "yes.",
+    "no."
+}
 
+def should_translate(text: str) -> bool:
+
+    if not text:
+        return False
+
+    text = text.strip()
+
+    # Bỏ qua từ quá ngắn
+    if len(text) <= 1:
+        return False
+
+    # Bỏ qua từ trong danh sách
+    if text.lower() in IGNORE_WORDS:
+        return False
+
+    # Chỉ có số
+    if text.isdigit():
+        return False
+
+    # Link
+    if text.startswith("http://") or text.startswith("https://"):
+        return False
+
+    # Username
+    if text.startswith("@"):
+        return False
+
+    # Hashtag
+    if text.startswith("#"):
+        return False
+
+    # Chỉ có emoji
+    if re.fullmatch(
+        r'[\U0001F300-\U0001FAFF\u2600-\u27BF\s]+',
+        text
+    ):
+        return False
+
+    return True
+    
+def should_translate(text: str) -> bool:
+
+    if not text:
+        return False
+
+    text = text.strip()
+
+    # Chỉ có emoji
+    if re.fullmatch(
+        r'[\U0001F300-\U0001FAFF\u2600-\u27BF\s]+',
+        text
+    ):
+        return False
+
+    # Chỉ có số
+    if text.isdigit():
+        return False
+
+    # Link
+    if text.startswith("http://") or text.startswith("https://"):
+        return False
+
+    # Username Telegram
+    if text.startswith("@"):
+        return False
+
+    # Hashtag
+    if text.startswith("#"):
+        return False
+
+    # Quá ngắn
+    if len(text) <= 1:
+        return False
+
+    return True
+    
 async def turn_on(
     update: Update,
     context: ContextTypes.DEFAULT_TYPE
@@ -200,8 +296,11 @@ async def translate_group(
     if not text:
         return
 
+    if not should_translate(text):
+        return
+
     response = client.chat.completions.create(
-        model="gpt-4.1-mini",
+        model="gpt-5.5-mini",
         messages=[
             {
                 "role": "system",
