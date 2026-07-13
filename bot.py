@@ -104,8 +104,6 @@ def should_translate(text: str) -> bool:
         return False
 
     return True
-    
-def should_translate(text: str) -> bool:
 
     if not text:
         return False
@@ -300,7 +298,7 @@ async def translate_group(
         return
 
     response = client.chat.completions.create(
-        model="gpt-5.5-mini",
+        model="gpt-4.1-mini",
         messages=[
             {
                 "role": "system",
